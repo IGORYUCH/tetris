@@ -7,5 +7,5 @@
 "GAME_SPEED":50,
 "GRID_ON":false,
 "SOUND_ON":true,
-"FONT_FILE":"8bitOperatorPlus8-Regular.ttf"
+"FONT_FILE":"assets/fonts/8bitOperatorPlus8-Regular.ttf"
 }

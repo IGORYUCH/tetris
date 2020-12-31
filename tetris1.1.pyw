@@ -1,14 +1,17 @@
 import pygame
-from copy import deepcopy  # нужен для "глубокого" копирования списков
+from copy import deepcopy
 from random import choice
 
+
 class Base_field:
+    
     def change_color(self,rect_list,color):# своеобразный сеттер для изменения цвета квадратов
         for rect in rect_list:
             self.field[rect[1]][rect[0]] = color  
 
 
 class Figure:
+    
     def __init__(self, coords, clr):
         self.rects_coords = coords #список коордитат квадратов, относящихся к финуре в данный момент
         self.figure_index = random_figures.index(coords)
@@ -17,11 +20,13 @@ class Figure:
         self.rotate_status = 0 
         self.was_swapped = False
 
+
     def fall(self): # перемещает фигуру вниз
         tetris_field.change_color(self.rects_coords,tetris_field.color)#затираем стандартным цветом предыдущие квадраты, занятые фигурой
         for rect in self.rects_coords:
             rect[1] += 1# меняем координату Y каждого квадрата фигуры
         tetris_field.change_color(self.rects_coords,self.color)#закрашиваем в цвет фигуры новые ее квадраты
+
        
     def is_overlayed(self, rect_list):#Метод, необходимый для проверки наложения новой фигуры на непустые квадраты
         for rect in rect_list:
@@ -38,6 +43,7 @@ class Figure:
         else:
             return False
 
+
     def move(self,direction):# перемещает фигуру влево - вправо
         x_cords = [i[0] for i in self.rects_coords]
         figure_max_x, figure_min_x = max(x_cords), min(x_cords)
@@ -48,6 +54,7 @@ class Figure:
                 tetris_field.change_color(self.rects_coords, tetris_field.color)
                 self.rects_coords = rects_plus_d
                 tetris_field.change_color(self.rects_coords, self.color)
+
             
     def rotate(self):# Метод поворота фигуры
         rotated_fig = deepcopy(self.rects_coords)# Сначала сделаем копию фигуры, повернем ее и проверим, не вылезает ли она за границы поля...
@@ -67,6 +74,7 @@ class Figure:
                 if self.rotate_status == len(figure_rotate[self.figure_index]):# если было было применено последнее правило поворота, то фигура в исходнои положении
                     self.rotate_status = 0
                 tetris_field.change_color(self.rects_coords, self.color)
+
                 
     def update_figure(self):#Замена фигуры на новую с новым цветом
         self.rects_coords = deepcopy(next_fig.figure)# Выбыр новой фигуры
@@ -77,6 +85,7 @@ class Figure:
         self.was_swapped = False
         if self.is_overlayed2(self.rects_coords) == True:
             return 1#Если при обновлении фигура накладывается, возвращаем 1
+
         
     def get_collision(self):#Метод проверки состояния под фигурой и если нужно выбор новой фигуры
         y_coords = [i[1] for i in self.rects_coords]
@@ -101,6 +110,7 @@ class Figure:
                             return 1#Если фигура наложилась при обновлении, возвращаем 1
                         next_fig.update_figure()
                         break
+
 
     def swap(self):#Меняет фигуру на удерживаемую
         if self.was_swapped == False:
@@ -131,9 +141,11 @@ class Figure:
     
 
 class Field(Base_field):
+    
     def __init__(self, color):
          self.color = color
          self.field = [[self.color for j in range(t_cells_x)] for i in range(t_cells_y)] #генератор двухмерного массива
+
 
     def strip_completed_lines(self):#Метод отвечающий за очиску заполненных линий и перемещение вниз квадратов, находившихся над этой линией
         global score
@@ -152,6 +164,7 @@ class Field(Base_field):
                             self.field[new_line][new_rect] = self.color
                 score += t_cells_x*10
 
+
     def reset(self):# Закрашивает в стандартный цвет все поле
         for line in range(len(self.field)):
             for rect in range(len(self.field[0])):
@@ -159,11 +172,13 @@ class Field(Base_field):
 
 
 class Next_fig(Base_field):  # класс новой фигуры и класс удерживаемой фигуры
+
     def __init__(self, new_coords, new_clr):
         self.field = [[tetris_field.color for j in range(4)] for i in range(3)]
         self.figure = new_coords
         self.printed_figure = [[printed_crds[0]-5, printed_crds[1]+1] for printed_crds in deepcopy(self.figure)]
         self.color = new_clr
+
 
     def update_figure(self):
         self.change_color(self.printed_figure, AIR_COLOR)
@@ -174,11 +189,13 @@ class Next_fig(Base_field):  # класс новой фигуры и класс 
 
 
 class Swap_fig(Base_field):  # класс новой фигуры и класс удерживаемой фигуры
+
     def __init__(self):
         self.field = [[tetris_field.color for j in range(4)] for i in range(3)]
         self.figure = [[5, -1]]
         self.printed_figure = [[printed_crds[0]-5,printed_crds[1]+1] for printed_crds in deepcopy(self.figure)]
         self.color = AIR_COLOR
+
 
     def update_figure(self):
         self.change_color(self.printed_figure, AIR_COLOR)
@@ -217,7 +234,7 @@ def animate():# функция, отвечающая за отрисовку в�
     pygame.display.flip()
 
 
-def reset_game():#Функция, начинающая новую игру
+def reset_game():
     global score, down_pressed
     new_game_sound.play()
     down_pressed = False
@@ -231,12 +248,12 @@ def reset_game():#Функция, начинающая новую игру
 
 pygame.init()
 pygame.display.set_caption('Tetris')
-strip_line_sound = pygame.mixer.Sound('pop.wav')
-swap_sound = pygame.mixer.Sound('warning.wav')
-move_sound = pygame.mixer.Sound('buttonrollover.wav')
-rot_sound = pygame.mixer.Sound('startup.wav')
-over_sound = pygame.mixer.Sound('critical.wav')
-new_game_sound = pygame.mixer.Sound('buttonclickrelease.wav')
+strip_line_sound = pygame.mixer.Sound('assets/sounds/pop.wav')
+swap_sound = pygame.mixer.Sound('assets/sounds/warning.wav')
+move_sound = pygame.mixer.Sound('assets/sounds/buttonrollover.wav')
+rot_sound = pygame.mixer.Sound('assets/sounds/startup.wav')
+over_sound = pygame.mixer.Sound('assets/sounds/critical.wav')
+new_game_sound = pygame.mixer.Sound('assets/sounds/buttonclickrelease.wav')
 
 try:
     with open('config.json') as file:
